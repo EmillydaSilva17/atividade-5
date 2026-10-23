@@ -10,10 +10,12 @@ public class BossController : MonoBehaviour, IDamageable
     [Header("Tiro")]
     public Bullet bulletPrefab;
     public Transform firePoint;
+    public float bulletSpeedScale = 0.7f;   // 1 = velocidade original dos comportamentos
 
     public int CurrentHealth { get; private set; }
     public int Phase { get; private set; }          // 0 = alta, 1 = média, 2 = baixa
     public bool Invulnerable { get; private set; }
+    public Vector3 HomePosition { get; private set; }
 
     public event Action<float, int> OnHealthChanged; // (percentual 0-1, fase)
     public event Action OnDefeated;
@@ -24,6 +26,7 @@ public class BossController : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        HomePosition = transform.position;
         animator = GetComponent<Animator>();
         CurrentHealth = maxHealth;
 
@@ -68,7 +71,7 @@ public class BossController : MonoBehaviour, IDamageable
         if (newPhase != Phase)
         {
             Phase = newPhase;
-            Invulnerable = true; // será desligado pelo estado de transição (etapa 3)
+            Invulnerable = true; // desligado pelo estado Transicao (BossTransicao)
             if (animator) animator.SetTrigger("Transicao");
         }
 
@@ -84,7 +87,7 @@ public class BossController : MonoBehaviour, IDamageable
     {
         var dir = new Vector2(Mathf.Cos(angleDeg * Mathf.Deg2Rad), Mathf.Sin(angleDeg * Mathf.Deg2Rad));
         var b = pool.Get();
-        b.Launch(firePoint.position, dir * speed);
+        b.Launch(firePoint.position, dir * speed * bulletSpeedScale);
     }
 
     void UpdateAnimator()
